@@ -131,8 +131,12 @@ async function deleteNote(noteId, item) {
   try {
     await request(`${API_URL}/${encodeURIComponent(noteId)}`, { method: "DELETE" });
     item.remove();
+    // JSONPlaceholder simulates deletes, so this change lasts only in the current page until notes are reloaded.
+    if (notesList.children.length === 0) {
+      renderNotes([]);
+    }
     setStatus(
-      notesList.children.length === 0 ? "No notes yet. Create one to get started." : "Note deleted successfully.",
+      notesList.querySelector(".empty-state") ? "No notes yet. Create one to get started." : "Note deleted successfully.",
       "success",
     );
   } catch (error) {
