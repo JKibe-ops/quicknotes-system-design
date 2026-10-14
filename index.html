@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A small QuickNotes API client demo.">
+    <title>QuickNotes</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="api.js" defer></script>
+  </head>
+  <body>
+    <main class="container">
+      <header class="page-header">
+        <p class="eyebrow">QuickNotes API client</p>
+        <h1>Your notes, at a glance</h1>
+        <p>Load example notes, add one, or remove one.</p>
+      </header>
+
+      <section class="panel" aria-labelledby="notes-heading">
+        <div class="section-heading">
+          <div>
+            <h2 id="notes-heading">Notes</h2>
+            <p class="muted">Example data is provided by JSONPlaceholder.</p>
+          </div>
+          <button id="load-btn" class="button button-secondary" type="button">Load notes</button>
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite">Load notes to get started.</p>
+        <ul id="notes-list" class="notes-list" aria-label="Notes"></ul>
+      </section>
+
+      <section class="panel" aria-labelledby="create-heading">
+        <h2 id="create-heading">Create a note</h2>
+        <form id="note-form">
+          <div class="field">
+            <label for="title-input">Title</label>
+            <input id="title-input" name="title" type="text" maxlength="100" required>
+            <span class="field-hint">Required, up to 100 characters.</span>
+          </div>
+          <div class="field">
+            <label for="body-input">Note</label>
+            <textarea id="body-input" name="body" rows="4" required></textarea>
+          </div>
+          <button id="submit-btn" class="button button-primary" type="submit">Create note</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
