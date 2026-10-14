@@ -7,8 +7,12 @@ const bodyInput = document.querySelector("#body-input");
 const submitButton = document.querySelector("#submit-btn");
 const statusMessage = document.querySelector("#status");
 const notesList = document.querySelector("#notes-list");
+const searchInput = document.querySelector("#search-input");
+const notesCount = document.querySelector("#notes-count");
+const sectionCount = document.querySelector("#section-count");
 
 let isRequestRunning = false;
+let notes = [];
 
 async function request(url, options = {}) {
   const response = await fetch(url, options);
@@ -42,33 +46,56 @@ function makeNoteElement(note) {
   item.dataset.noteId = String(note.id);
 
   const content = document.createElement("div");
+  content.className = "note-content";
+  const meta = document.createElement("div");
+  meta.className = "note-meta";
+  const metaDot = document.createElement("span");
+  const metaText = document.createElement("span");
+  metaText.textContent = "NOTE";
+  meta.append(metaDot, metaText);
   const title = document.createElement("h3");
   title.textContent = note.title;
   const body = document.createElement("p");
   body.textContent = note.body;
-  content.append(title, body);
+  content.append(meta, title, body);
 
   const deleteButton = document.createElement("button");
   deleteButton.className = "button button-danger";
   deleteButton.type = "button";
   deleteButton.textContent = "Delete";
-  deleteButton.setAttribute("aria-label", `Delete ${note.title}`);
-  deleteButton.addEventListener("click", () => deleteNote(note.id, item));
+  deleteButton.setAttribute("aria-label", "Delete note");
+  deleteButton.addEventListener("click", () => deleteNote(note.id));
 
-  item.append(content, deleteButton);
+  const footer = document.createElement("div");
+  footer.className = "note-footer";
+  const noteId = document.createElement("span");
+  noteId.className = "note-id";
+  noteId.textContent = `NOTE-${String(note.id).padStart(3, "0")}`;
+  footer.append(noteId, deleteButton);
+  item.append(content, footer);
   return item;
 }
 
-function renderNotes(notes) {
-  if (notes.length === 0) {
+function renderNotes() {
+  const query = searchInput.value.trim().toLocaleLowerCase();
+  const visibleNotes = notes.filter((note) =>
+    `${note.title} ${note.body}`.toLocaleLowerCase().includes(query),
+  );
+  notesCount.textContent = String(notes.length);
+  sectionCount.textContent = notes.length === 0 ? "Ready when you are" : `${notes.length} notes`;
+
+  if (visibleNotes.length === 0) {
     const emptyState = document.createElement("li");
     emptyState.className = "empty-state";
-    emptyState.textContent = "No notes found. Create your first note.";
+    emptyState.textContent =
+      notes.length === 0
+        ? "Your workspace is clear. Load notes or capture a thought to get started."
+        : "No notes match your search.";
     notesList.replaceChildren(emptyState);
     return;
   }
 
-  notesList.replaceChildren(...notes.map(makeNoteElement));
+  notesList.replaceChildren(...visibleNotes.map(makeNoteElement));
 }
 
 async function loadNotes() {
@@ -79,8 +106,9 @@ async function loadNotes() {
   setBusy(true);
   setStatus("Loading notes...");
   try {
-    const { data: notes } = await request(`${API_URL}?_limit=10`);
-    renderNotes(notes);
+    const { data } = await request(`${API_URL}?_limit=10`);
+    notes = data;
+    renderNotes();
     setStatus(notes.length === 0 ? "No notes found." : "Loaded 10 notes from the server.", "success");
   } catch (error) {
     setStatus(
@@ -107,11 +135,8 @@ async function createNote(title, body) {
       headers: { "Content-Type": "application/json; charset=UTF-8" },
       body: JSON.stringify({ title, body, userId: 1 }),
     });
-    const emptyState = notesList.querySelector(".empty-state");
-    if (emptyState) {
-      emptyState.remove();
-    }
-    notesList.prepend(makeNoteElement(note));
+    notes.unshift(note);
+    renderNotes();
     setStatus(`Note created (status ${status}, id ${note.id}).`, "success");
     noteForm.reset();
   } catch (error) {
@@ -121,7 +146,7 @@ async function createNote(title, body) {
   }
 }
 
-async function deleteNote(noteId, item) {
+async function deleteNote(noteId) {
   if (isRequestRunning) {
     return;
   }
@@ -130,13 +155,11 @@ async function deleteNote(noteId, item) {
   setStatus("Deleting note…");
   try {
     await request(`${API_URL}/${encodeURIComponent(noteId)}`, { method: "DELETE" });
-    item.remove();
+    notes = notes.filter((note) => String(note.id) !== String(noteId));
     // JSONPlaceholder simulates deletes, so this change lasts only in the current page until notes are reloaded.
-    if (notesList.children.length === 0) {
-      renderNotes([]);
-    }
+    renderNotes();
     setStatus(
-      notesList.querySelector(".empty-state") ? "No notes yet. Create one to get started." : "Note deleted successfully.",
+      notes.length === 0 ? "Note deleted. Your workspace is clear." : "Note deleted successfully.",
       "success",
     );
   } catch (error) {
@@ -147,6 +170,18 @@ async function deleteNote(noteId, item) {
 }
 
 loadButton.addEventListener("click", loadNotes);
+searchInput.addEventListener("input", renderNotes);
+document.addEventListener("keydown", (event) => {
+  const target = event.target;
+  const isTyping = target instanceof HTMLElement && (
+    target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName)
+  );
+
+  if (event.key === "/" && !isTyping) {
+    event.preventDefault();
+    searchInput.focus();
+  }
+});
 
 noteForm.addEventListener("submit", (event) => {
   event.preventDefault();

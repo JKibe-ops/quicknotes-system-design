@@ -1,6 +1,6 @@
 # QuickNotes System Design
 
-A small browser client for trying GET, POST, and DELETE requests against JSONPlaceholder, accompanied by a REST API design, relational data model, and scalable service architecture for a production QuickNotes application.
+A responsive QuickNotes workspace for trying GET, POST, and DELETE requests against JSONPlaceholder, accompanied by a REST API design, relational data model, and scalable service architecture for a production service. The interface includes searchable note cards and a side-panel composer; search filters notes already loaded into the page.
 
 ## Run the API client
 

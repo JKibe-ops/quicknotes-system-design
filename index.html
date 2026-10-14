@@ -3,46 +3,135 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="A small QuickNotes API client demo.">
-    <title>QuickNotes</title>
+    <meta name="description" content="A polished QuickNotes workspace connected to the JSONPlaceholder demo API.">
+    <title>QuickNotes — API Preview</title>
     <link rel="stylesheet" href="style.css">
     <script src="api.js" defer></script>
   </head>
   <body>
-    <main class="container">
-      <header class="page-header">
-        <p class="eyebrow">QuickNotes API client</p>
-        <h1>Your notes, at a glance</h1>
-        <p>Load example notes, add one, or remove one.</p>
-      </header>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="Workspace navigation">
+        <a class="brand" href="#workspace" aria-label="QuickNotes home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M7 3.75h7l5 5V19a1.25 1.25 0 0 1-1.25 1.25h-10.5A1.25 1.25 0 0 1 6 19V5a1.25 1.25 0 0 1 1.25-1.25Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M14 4v5h5M9 13h6M9 16.5h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span>quicknotes</span>
+        </a>
 
-      <section class="panel" aria-labelledby="notes-heading">
-        <div class="section-heading">
-          <div>
-            <h2 id="notes-heading">Notes</h2>
-            <p class="muted">Example data is provided by JSONPlaceholder.</p>
-          </div>
-          <button id="load-btn" class="button button-secondary" type="button">Load notes</button>
+        <div class="workspace-switcher">
+          <span class="workspace-avatar" aria-hidden="true">A</span>
+          <span class="workspace-details">
+            <strong>Personal space</strong>
+            <span>Free workspace</span>
+          </span>
+          <span class="switcher-chevron" aria-hidden="true">⌄</span>
         </div>
-        <p id="status" class="status" role="status" aria-live="polite">Load notes to get started.</p>
-        <ul id="notes-list" class="notes-list" aria-label="Notes"></ul>
-      </section>
 
-      <section class="panel" aria-labelledby="create-heading">
-        <h2 id="create-heading">Create a note</h2>
-        <form id="note-form">
-          <div class="field">
-            <label for="title-input">Title</label>
-            <input id="title-input" name="title" type="text" maxlength="100" required>
-            <span class="field-hint">Required, up to 100 characters.</span>
+        <nav class="side-nav" aria-label="Notes">
+          <p class="nav-label">Workspace</p>
+          <a class="nav-link active" href="#notes-heading" aria-current="page">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 6.75h14M5 12h14M5 17.25h9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              <circle cx="3.5" cy="6.75" r=".75" fill="currentColor"/>
+              <circle cx="3.5" cy="12" r=".75" fill="currentColor"/>
+              <circle cx="3.5" cy="17.25" r=".75" fill="currentColor"/>
+            </svg>
+            <span>All notes</span>
+            <span id="notes-count" class="nav-count">0</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <span class="connection-indicator" aria-hidden="true"></span>
+          <span>Demo API connected</span>
+        </div>
+      </aside>
+
+      <div id="workspace" class="workspace">
+        <header class="topbar">
+          <p class="breadcrumb">Personal space <span>/</span> All notes</p>
+          <div class="topbar-actions">
+            <label class="search-box" for="search-input">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.3" stroke="currentColor" stroke-width="1.7"/>
+                <path d="m15.5 15.5 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              </svg>
+              <input id="search-input" type="search" placeholder="Search notes..." autocomplete="off">
+              <kbd>/</kbd>
+            </label>
+            <span class="profile-avatar" aria-label="Alex Morgan">AM</span>
           </div>
-          <div class="field">
-            <label for="body-input">Note</label>
-            <textarea id="body-input" name="body" rows="4"></textarea>
+        </header>
+
+        <div class="page-content">
+          <section class="welcome-banner" aria-label="Welcome">
+            <div>
+              <p class="eyebrow">TUESDAY, OCTOBER 14</p>
+              <h1>A little space for your thoughts.</h1>
+              <p>Keep the important things close. Pick up right where you left off.</p>
+            </div>
+            <div class="welcome-art" aria-hidden="true">
+              <span class="art-sun"></span>
+              <span class="art-card art-card-back"></span>
+              <span class="art-card art-card-front"><i></i><i></i><i></i></span>
+              <span class="art-sparkle">✳</span>
+            </div>
+          </section>
+
+          <div class="content-grid">
+            <section class="notes-section" aria-labelledby="notes-heading">
+              <div class="section-heading">
+                <div>
+                  <div class="heading-with-count">
+                    <h2 id="notes-heading">Your notes</h2>
+                    <span id="section-count" class="section-count">Ready when you are</span>
+                  </div>
+                  <p class="section-subtitle">Ideas, reminders, and everything in between.</p>
+                </div>
+                <button id="load-btn" class="button button-secondary" type="button">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M20 11a8 8 0 0 0-14.9-3M4 5v3.5h3.5M4 13a8 8 0 0 0 14.9 3M20 19v-3.5h-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Load notes</span>
+                </button>
+              </div>
+              <p id="status" class="status" role="status" aria-live="polite">Connect to your notes by loading them from the server.</p>
+              <ul id="notes-list" class="notes-list" aria-label="Notes"></ul>
+            </section>
+
+            <aside class="composer-column">
+              <section class="composer-card" aria-labelledby="create-heading">
+                <div class="composer-heading">
+                  <span class="composer-icon" aria-hidden="true">✳</span>
+                  <div>
+                    <h2 id="create-heading">Capture a thought</h2>
+                    <p>Start with the headline.</p>
+                  </div>
+                </div>
+                <form id="note-form">
+                  <div class="field">
+                    <label for="title-input">Title</label>
+                    <input id="title-input" name="title" type="text" maxlength="100" placeholder="What’s on your mind?" required>
+                    <span class="field-hint">A short, memorable title.</span>
+                  </div>
+                  <div class="field">
+                    <label for="body-input">Details <span class="optional-label">Optional</span></label>
+                    <textarea id="body-input" name="body" rows="5" placeholder="Add a few details, if you like..."></textarea>
+                  </div>
+                  <button id="submit-btn" class="button button-primary" type="submit">
+                    <span aria-hidden="true">＋</span>
+                    <span>Create note</span>
+                  </button>
+                </form>
+              </section>
+              <p class="demo-note"><span aria-hidden="true">ⓘ</span> This preview uses a demo service. New notes appear here but aren’t permanently saved.</p>
+            </aside>
           </div>
-          <button id="submit-btn" class="button button-primary" type="submit">Create note</button>
-        </form>
-      </section>
+        </div>
+      </div>
     </main>
   </body>
 </html>
