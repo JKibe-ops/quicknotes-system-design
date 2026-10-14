@@ -16,11 +16,10 @@ async function request(url, options = {}) {
     throw new Error(`Request failed (${response.status}). Please try again.`);
   }
 
-  if (response.status === 204) {
-    return null;
-  }
-
-  return response.json();
+  return {
+    data: response.status === 204 ? null : await response.json(),
+    status: response.status,
+  };
 }
 
 function setStatus(message, state = "") {
@@ -80,7 +79,7 @@ async function loadNotes() {
   setBusy(true);
   setStatus("Loading notes...");
   try {
-    const notes = await request(`${API_URL}?_limit=10`);
+    const { data: notes } = await request(`${API_URL}?_limit=10`);
     renderNotes(notes);
     setStatus(notes.length === 0 ? "No notes found." : "Loaded 10 notes from the server.", "success");
   } catch (error) {
@@ -103,13 +102,17 @@ async function createNote(title, body) {
   setBusy(true);
   setStatus("Creating note…");
   try {
-    const note = await request(API_URL, {
+    const { data: note, status } = await request(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json; charset=UTF-8" },
       body: JSON.stringify({ title, body, userId: 1 }),
     });
+    const emptyState = notesList.querySelector(".empty-state");
+    if (emptyState) {
+      emptyState.remove();
+    }
     notesList.prepend(makeNoteElement(note));
-    setStatus("Note created successfully.", "success");
+    setStatus(`Note created (status ${status}, id ${note.id}).`, "success");
     noteForm.reset();
   } catch (error) {
     setStatus(error.message, "error");
@@ -155,12 +158,6 @@ noteForm.addEventListener("submit", (event) => {
   if (title.length > 100) {
     setStatus("The title must be 100 characters or fewer.", "error");
     titleInput.focus();
-    return;
-  }
-
-  if (body.length === 0) {
-    setStatus("A note body is required.", "error");
-    bodyInput.focus();
     return;
   }
 
