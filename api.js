@@ -61,6 +61,14 @@ function makeNoteElement(note) {
 }
 
 function renderNotes(notes) {
+  if (notes.length === 0) {
+    const emptyState = document.createElement("li");
+    emptyState.className = "empty-state";
+    emptyState.textContent = "No notes found. Create your first note.";
+    notesList.replaceChildren(emptyState);
+    return;
+  }
+
   notesList.replaceChildren(...notes.map(makeNoteElement));
 }
 
@@ -70,16 +78,18 @@ async function loadNotes() {
   }
 
   setBusy(true);
-  setStatus("Loading notes…");
+  setStatus("Loading notes...");
   try {
     const notes = await request(`${API_URL}?_limit=10`);
     renderNotes(notes);
-    setStatus(
-      notes.length === 0 ? "No notes yet. Create one to get started." : `Loaded ${notes.length} notes.`,
-      "success",
-    );
+    setStatus(notes.length === 0 ? "No notes found." : "Loaded 10 notes from the server.", "success");
   } catch (error) {
-    setStatus(error.message, "error");
+    setStatus(
+      error instanceof Error && error.message.startsWith("Request failed")
+        ? `Could not load notes. ${error.message}`
+        : "Could not load notes. Please check your connection and try again.",
+      "error",
+    );
   } finally {
     setBusy(false);
   }
